@@ -1,0 +1,46 @@
+# Dependencies and generated output
+node_modules/
+.next/
+dist/
+.test-dist/
+out/
+coverage/
+*.tsbuildinfo
+.turbo/
+
+# Local environment and credentials; examples contain placeholders only
+.env
+.env.*
+!.env.example
+.npmrc.local
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+secrets/
+
+# Logs, editor and OS files
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Local data and backup files (never commit pharmacy data)
+*.sql
+!apps/api/prisma/migrations/**/migration.sql
+*.dump
+*.backup
+infrastructure/docker/data/
+.local/
+playwright-report/
+test-results/
+
+# Accidental nested Git checkout; preserve it locally without publishing a gitlink.
+/Pharmacy-Management-System/
+
+# Original coursework contains identifiable people and private pharmacy context.
+# Publish the anonymized public requirements summary; preserve originals locally.
+/docs/requirements/
+/docs/requirements-analysis.md

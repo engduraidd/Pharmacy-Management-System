@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum UserRole {
+  OWNER
+  EMPLOYEE
+}
+
+model User {
+  userId       Int       @id @default(autoincrement())
+  fullName     String
+  username     String    @unique
+  passwordHash String
+  role         UserRole
+  sales        Sale[]
+  sessions     Session[]
+
+  @@map("app_user")
+}
+
+model Session {
+  sessionId Int      @id @default(autoincrement())
+  tokenHash String   @unique
+  userId    Int
+  expiresAt DateTime @db.Timestamptz(3)
+  user      User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("session")
+}
+
+model Medicine {
+  medicineId          Int          @id @default(autoincrement())
+  name                String
+  brand               String?
+  description         String?
+  barcode             String?
+  currentSellingPrice Decimal      @db.Decimal(18, 4)
+  batches             StockBatch[]
+
+  @@map("medicine")
+}
+
+model StockBatch {
+  batchId               Int        @id @default(autoincrement())
+  medicineId            Int
+  quantity              Int
+  expiryDate            DateTime   @db.Date
+  supplierPurchasePrice Decimal?   @db.Decimal(18, 4)
+  medicine              Medicine   @relation(fields: [medicineId], references: [medicineId], onDelete: Restrict)
+  saleItems             SaleItem[]
+
+  @@index([medicineId, expiryDate, batchId])
+  @@index([expiryDate])
+  @@map("stock_batch")
+}
+
+model Sale {
+  saleId      Int        @id @default(autoincrement())
+  userId      Int
+  dateTime    DateTime   @default(now()) @db.Timestamptz(3)
+  totalAmount Decimal    @db.Decimal(18, 4)
+  requestKey  String     @unique @db.Uuid
+  requestHash String
+  user        User       @relation(fields: [userId], references: [userId], onDelete: Restrict)
+  items       SaleItem[]
+
+  @@index([userId, dateTime])
+  @@map("sale")
+}
+
+model SaleItem {
+  saleItemId       Int        @id @default(autoincrement())
+  saleId           Int
+  batchId          Int
+  quantity         Int
+  unitSellingPrice Decimal    @db.Decimal(18, 4)
+  subtotal         Decimal    @db.Decimal(18, 4)
+  sale             Sale       @relation(fields: [saleId], references: [saleId], onDelete: Restrict)
+  batch            StockBatch @relation(fields: [batchId], references: [batchId], onDelete: Restrict)
+
+  @@index([saleId])
+  @@index([batchId])
+  @@map("sale_item")
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
